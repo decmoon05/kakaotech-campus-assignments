@@ -5,6 +5,7 @@ const STORAGE_KEY = "todos";
 let todos = [];
 let currentFilter = "all";
 let selectedDate = toDateString(new Date());
+const today = toDateString(new Date());
 
 // DOM 요소
 const form = document.getElementById("todo-form");
@@ -56,8 +57,64 @@ function getVisibleTodos() {
     });
 }
 
+// selectedDate가 속한 주의 월~일 7개 날짜
+function getWeekDates(refDate) {
+  const d = new Date(refDate);
+  const day = d.getDay();   // 일=0, 월=1, ..., 토=6
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+  const week = [];
+  for (let i = 0; i < 7; i++) {
+    const t = new Date(monday);
+    t.setDate(monday.getDate() + i);
+    week.push(toDateString(t));
+  }
+  return week;
+}
+
+// 특정 날짜의 todo 개수
+function countByDate(dateStr) {
+  return todos.filter((t) => t.date === dateStr).length;
+}
+
+// 주간 뷰 그리기
+function renderWeek() {
+  const week = getWeekDates(selectedDate);
+  const names = ["월", "화", "수", "목", "금", "토", "일"];
+  const ul = document.getElementById("week-days");
+  ul.innerHTML = "";
+
+  week.forEach((dateStr, i) => {
+    const li = document.createElement("li");
+    li.className = "week-day";
+    if (dateStr === selectedDate) li.classList.add("selected");
+    if (dateStr === today) li.classList.add("today");
+
+    const count = countByDate(dateStr);
+    li.innerHTML = `
+      <div class="week-day-name">${names[i]}</div>
+      <div class="week-day-num">${new Date(dateStr).getDate()}</div>
+      <div class="week-day-count">${count > 0 ? count + "개" : ""}</div>
+    `;
+    li.addEventListener("click", () => {
+      selectedDate = dateStr;
+      render();
+    });
+    ul.appendChild(li);
+  });
+}
+
+// 주 단위 이동 (7일씩)
+function shiftWeek(weeks) {
+  const d = new Date(selectedDate);
+  d.setDate(d.getDate() + weeks * 7);
+  selectedDate = toDateString(d);
+  render();
+}
+
 // 화면 다시 그리기
 function render() {
+  renderWeek();
   dateLabel.textContent = formatDateLabel(selectedDate);
   list.innerHTML = "";
 
@@ -190,6 +247,9 @@ document.querySelectorAll(".filter-btn").forEach((btn) => {
 
 document.getElementById("prev-day").addEventListener("click", () => shiftDay(-1));
 document.getElementById("next-day").addEventListener("click", () => shiftDay(1));
+
+document.getElementById("prev-week").addEventListener("click", () => shiftWeek(-1));
+document.getElementById("next-week").addEventListener("click", () => shiftWeek(1));
 
 // 시작
 load();
