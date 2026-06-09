@@ -1,0 +1,8 @@
+node_modules
+dist
+.DS_Store
+*.log
+.vite
+
+# 회고 초안 (GitHub Issue 본문으로만 사용)
+ISSUE_DRAFT.md
