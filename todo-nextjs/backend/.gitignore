@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+*.db
+.env.local
+.DS_Store
+
+# 회고 초안 (GitHub Issue 본문 전용, 푸시 제외)
+../ISSUE_DRAFT.md
